@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!-- 思路：1.利用旋转木马案例(不是轮播图)搭建立方体；搭建四个立方体。左右没有只有前后上下四个面;可以用ul 四个li;或者一个div 包着4个div; 
+          2.旋转每个立方体X轴90度；同一个方向旋转是90*(n次)度；
+          3.设置定时器；自动切换；
+          4.解决bug;bug1 点击多少次动画就触发多少次。会造成轮播图混乱，体验差；解决思路函数防抖节流，多次点击只触发一次事件
+          bug2 离开页面未关闭页面，过一会打开页面：动画依旧加载。解决思路，离开页面事件。
+-->
+    <style>
+        body {
+            perspective: 1500px;
+        }
+        
+        .contain {
+            margin-top: 50px;
+            position: relative;
+            transition: all 1s;
+        }
+        
+        .box {
+            height: 240px;
+            position: relative;
+            transform-style: preserve-3d;
+            width: 240px;
+            transition: all 1s;
+        }
+        
+        .face {
+            backface-visibility: hidden;
+            /*定义元素在不面对屏幕时是否可见。
+            backface-visibility: visible|hidden;值 描述 
+              visible 背面是可见的。 
+              hidden 背面是不可见的。 
+*/
+            height: 100%;
+            position: absolute;
+            width: 100%;
+            background-size: cover;
+        }
+        
+        .box .one {
+            transform: rotateX(90deg) translateZ(120px);
+            background: url(./images/1.jpg) no-repeat center;
+        }
+        
+        .box .two {
+            transform: translateZ(120px);
+            background: url(./images/2.jpg) no-repeat center;
+        }
+        
+        .box .four {
+            transform: rotateX(180deg) translateZ(120px);
+            background: url(./images/3.jpg) no-repeat center;
+        }
+        
+        .box .six {
+            transform: rotateX(-90deg) translateZ(120px);
+            background: url(./images/4.jpg) no-repeat center;
+        }
+        
+        .con2 {
+            margin-left: 239px;
+            margin-top: -240px;
+        }
+        
+        .con3 {
+            margin-left: 478px;
+            margin-top: -240px;
+        }
+        
+        .con4 {
+            margin-left: 717px;
+            margin-top: -240px;
+        }
+        
+        button {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="contain">
+        <div id="num" class="box">
+            <div class="face one"> </div>
+            <div class="face two"> </div>
+            <div class="face four"> </div>
+            <div class="face six"> </div>
+        </div>
+    </div>
+    <div class="contain con2">
+        <div id="num2" class="box">
+            <div class="face one"> </div>
+            <div class="face two"> </div>
+            <div class="face four"> </div>
+            <div class="face six"> </div>
+        </div>
+    </div>
+    <div class="contain con3">
+        <div id="num3" class="box">
+            <div class="face one"> </div>
+            <div class="face two"> </div>
+            <div class="face four"> </div>
+            <div class="face six"> </div>
+        </div>
+    </div>
+    <div class="contain con4">
+        <div id="num4" class="box">
+            <div class="face one"> </div>
+            <div class="face two"> </div>
+            <div class="face four"> </div>
+            <div class="face six"> </div>
+        </div>
+    </div>
+    <button id="btn">按钮</button>
+    <button id="btn2">按钮2</button>
+</body>
+
+</html>
+</body>
+
+</html>
+<script src="jquery-1.12.4.min.js"></script>
+<script>
+    var ul = document.querySelector('ul');
+    var boxList = document.getElementsByClassName('box');
+    var btn = document.getElementById('btn');
+    var btn2 = document.getElementById('btn2');
+    var num = 0.2; //延迟时间变量  时间大小可以调，但是一定要大于定时器(rest())里的时间,
+    var j = 0; //角度变量
+    var timeid; //定时器变量，所有的全局变量都是为了方便调用。
+    function rest() {
+        timeid = setInterval(function() {
+            --j;
+            qiege();
+        }, 2000)
+    }
+    rest();
+    var timeend = null;
+    //实现旋转，切割效果的函数
+    function qiege() {
+        for (var index = 0; index < boxList.length; index++) {
+            boxList[index].style.transform = "rotateX(" + j * 90 + "deg)"; //每一次盒子旋转角度
+            boxList[index].style.transition = "all 1s  " + num * index + "s"; //盒子动画延迟时间
+        }
+    }
+    /*var timeend = null; 
+    clearTimeout(timeend); 
+    timeend = setTimeout("rest()", 2000)
+    用户2秒后没有点击会自动调用rest()执行动画，
+    */
+    btn.onclick = function() {
+        clearTimeout(timeend);
+        clearInterval(timeid);
+        debounce(function() {
+            ++j;
+            qiege();
+        }, 500);
+        timeend = setTimeout("rest()", 2000);
+    }
+    btn2.onclick = function() {
+            clearTimeout(timeend);
+            clearInterval(timeid);
+            debounce(function() {
+                --j;
+                qiege();
+            }, 500);
+            timeend = setTimeout("rest()", 2000);
+        }
+        //离开页面,不加载动画
+    document.addEventListener("visibilitychange", function() {
+        document.hidden ? clearInterval(timeid) : rest();
+    });
+    //背景图片定位代码实现。每次定位距离相等，跟旋转角度 一样。
+    $(function() {
+        $(".box").each(function(index, el) {
+            $(this).find(".face").css({
+                "backgroundPosition": -$(this).width() * index + "px"
+            });;
+        });
+    });
+    // 函数防抖
+    var time = null;
+
+    function debounce(method, delay) {
+        time && clearTimeout(time);
+        time = setTimeout(() => {
+            method()
+        }, delay);
+    }
+</script>

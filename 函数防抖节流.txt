@@ -1,0 +1,77 @@
+ /*
+            函数防抖:
+				定义: 多次触发事件后, 事件处理函数只执行一次, 并且在触发操作结束时执行.
+				原理: 对处理函数进行延时操作, 若设定的延时到来之前, 再次触发事件, 则清除上一次的延时操作定时器, 重新定时
+				优点: 解决了多次触发事件时的性能问题
+				缺点: 图片懒加载 lazyload, 函数将不断被延时, 就显得不友好了
+            */
+
+            /**
+			@params 函数 
+			@params 多少米延迟
+			1.	返回闭包
+			2.	变量保存this 和 参数
+			3.	判断是否还有定时器有就清除
+			4.  设置一个定时器, 再用上下文模式, 修改this执行, 传入参数
+
+
+            */
+
+            function debounce(method, delay) {
+                let timer = null;
+                return function () {
+                    let self = this,
+                        args = arguments;
+                    timer && clearTimeout(timer)
+                    timer = setTimeout(function () {
+                        method.apply(self, args)
+                    }, delay)
+                }
+            }
+             */
+
+
+//var time = null;
+    function debounce(method, delay) {
+      time && clearTimeout(time);
+      time = setTimeout(() => {
+        method()
+      }, delay);
+    }//
+            /*
+            函数节流:
+				定义: 触发函数事件后, 短时间间隔内无法连续调用, 只有上一次函数执行后, 过了规定的时间间隔, 才能进行下一次的函数调用.
+				原理: 对处理函数进行延时操作, 若设定的延时到来之前, 再次触发事件, 则清除上一次的延时操作定时器, 重新定时
+            */
+            
+            function torottle(method, mustRunDelay) {
+                let timer, // 定时器
+                    args = arguments, // 保存参数
+                    start; // 开始时间
+                return function loop() {
+                    let self = this; // 保存this
+                    let now = Date.now(); // 获取当前时间
+                    if (!start) { // 如果没有当前时间就赋值
+                        start = now;	
+                    }
+
+				    // 清除定时器
+                    timer && clearTimeout(timer);
+
+                    // 如果选择时间减去开始时间 大于 等于 设置的时间就执行
+                    // 否则就50毫秒执行一次
+                    if (now - start >= mustRunDelay) {
+                        method.apply(self, args);
+                        start = now;
+                    } else {
+                        timer = setTimeout(function () {
+                            loop.apply(self, args);
+                        }, 50);
+                    }
+                }
+            }
+
+        // 实例
+        /* window.onscroll = torottle(function () {
+			console.log(document.documentElement.scrollTop);
+		}, 800); */
